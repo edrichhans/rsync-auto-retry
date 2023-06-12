@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 source=$1
 destination=$2
@@ -26,20 +26,20 @@ i=0
 # Set the initial return value to failure
 false
 
-currentdate=$(date +'%Y-%m-%d')
+currentdate=$(date +'%Y-%m-%dT%H-%M')
 finaldestination="$destination/$currentdate"
-mkdir $finaldestination
+mkdir "$finaldestination"
 
 while [ $? -ne 0 -a $i -lt $MAX_RETRIES ]
 do
  i=$(($i+1))
- rsync -avz --progress --partial --append $source/* $finaldestination/
+ rsync -avzs --progress --partial --append "$source/" "$finaldestination/"
 done
 
 if [ $i -eq $MAX_RETRIES ]
 then
   echo "Hit maximum number of retries, giving up."
+else
+  echo "Finished backing up."
+  touch "$finaldestination.finished.txt"
 fi
-
-echo "Finished backing up."
-touch "$finaldestination.finished.txt"
