@@ -1,7 +1,28 @@
 #!/bin/sh
 
-source=$1
-destination=$2
+while getopts ":s:d:e:" option; do
+  case $option in
+    s)
+      source="$OPTARG"
+      ;;
+    d)
+      destination="$OPTARG"
+      ;;
+    e)
+      event="$OPTARG"
+      ;;
+    *)
+      echo "Usage: $0 [-s source] [-d destination] [-e event_name]"
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$event" ]; then
+    echo "No event provided. Please provide an event name using -e"
+
+    exit 1
+fi
 
 if ! [ -d "$source" ]; then
   echo "Invalid source directory"
@@ -16,7 +37,7 @@ if ! [ -d "$destination" ]; then
 fi
 
 
-echo "Backing up $source to $destination..."
+echo "Backing up $source to $destination/$event..."
 
 trap "echo Exited!; exit;" SIGINT SIGTERM
 
@@ -26,8 +47,7 @@ i=0
 # Set the initial return value to failure
 false
 
-currentdate=$(date +'%Y-%m-%dT%H-%M')
-finaldestination="$destination/$currentdate"
+finaldestination="$destination/$event"
 mkdir "$finaldestination"
 
 while [ $? -ne 0 -a $i -lt $MAX_RETRIES ]
